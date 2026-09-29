@@ -1,0 +1,6 @@
+flask>=3.0
+psycopg[binary,pool]>=3.2
+# Signing recruiter session tokens. Flask already depends on it; named here
+# because this app imports it directly.
+itsdangerous>=2.2
+gunicorn>=23.0

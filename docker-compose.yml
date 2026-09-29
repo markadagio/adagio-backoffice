@@ -1,0 +1,20 @@
+services:
+  adagio-backoffice:
+    image: ghcr.io/markadagio/adagio-backoffice:latest
+    # To build locally instead of pulling from GHCR, comment the line above
+    # and uncomment:
+    # build: .
+    ports:
+      - "0.0.0.0:3000:3000"
+    environment:
+      # Full PostgreSQL connection string. Kept out of the repo: put the real
+      # value (with the password) in a .env file next to this one, which is
+      # gitignored.
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL in .env}
+      # Signs recruiter session tokens. Changing it logs everyone out — set
+      # it once and keep it.
+      APP_SECRET: "${APP_SECRET:?set APP_SECRET in .env}"
+      # Only read while the user table is empty.
+      ADMIN_EMAIL: "${ADMIN_EMAIL:-admin@adagiotalent.mx}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-admin}"
+    restart: unless-stopped
