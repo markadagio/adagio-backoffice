@@ -30,6 +30,18 @@ SESSION_MAX_AGE = 8 * 3600
 app = Flask(__name__, static_folder=None)
 _signer = URLSafeTimedSerializer(APP_SECRET, salt="adagio-session")
 
+
+@app.after_request
+def _cors_public(response):
+    # The public job board (adagio-talent-web) may run on a different
+    # origin than the shared reverse proxy eventually gives it. Only the
+    # read-only /api/public/* routes get this — everything else requires
+    # the Authorization header a browser won't send cross-origin anyway.
+    if request.path.startswith("/api/public/"):
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET"
+    return response
+
 ROLES = {"admin", "recruiter"}
 ARRANGEMENTS = {"remote", "hybrid", "on-site"}
 EMPLOYMENT_TYPES = {"full-time", "part-time", "contract"}
