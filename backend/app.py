@@ -782,11 +782,15 @@ def bootstrap():
         if count == 0:
             email = os.environ.get("ADMIN_EMAIL", "admin@adagiotalent.mx")
             password = os.environ.get("ADMIN_PASSWORD", "Admin123!")
-            conn.execute(
-                "INSERT INTO app_user (name, email, password_hash, role) VALUES (%s,%s,%s,'admin')",
+            # ON CONFLICT DO NOTHING: gunicorn boots multiple workers that
+            # each import this module and race to seed the same admin row.
+            created = conn.execute(
+                "INSERT INTO app_user (name, email, password_hash, role) "
+                "VALUES (%s,%s,%s,'admin') ON CONFLICT (email) DO NOTHING RETURNING id",
                 ("Administrador", email.lower(), hash_password(password)),
-            )
-            print(f"  created initial admin '{email}' — change the password")
+            ).fetchone()
+            if created:
+                print(f"  created initial admin '{email}' — change the password")
 
 
 bootstrap()
